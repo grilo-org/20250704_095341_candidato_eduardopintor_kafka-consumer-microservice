@@ -3,6 +3,7 @@ module eduardopintor/kafka-consumer-microservice.git
 go 1.24.3
 
 require (
+	github.com/confluentinc/confluent-kafka-go/v2 v2.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect

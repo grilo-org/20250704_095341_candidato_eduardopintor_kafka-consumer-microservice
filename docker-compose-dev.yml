@@ -1,10 +1,4 @@
 services:
-  zookeeper:
-    image: bitnami/zookeeper:latest
-    ports:
-      - "2181:2181"
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
     image: bitnami/kafka:3.6
@@ -13,19 +7,26 @@ services:
       - "9093:9093"
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka:9093,EXTERNAL://localhost:9092
-      - KAFKA_CFG_LISTENERS=INTERNAL://:9093,EXTERNAL://:9092
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,EXTERNAL://localhost:9093
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
-      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
+      - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=SASL_PLAINTEXT # <-- Add this line
       - KAFKA_CLIENT_USERS=myuser
       - KAFKA_CLIENT_PASSWORDS=mypassword
       - KAFKA_INTER_BROKER_USER=myuser
       - KAFKA_INTER_BROKER_PASSWORD=mypassword
       - ALLOW_PLAINTEXT_LISTENER=yes
-
     depends_on:
       - zookeeper
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -33,7 +34,13 @@ services:
       - "8085:8080"
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
       - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
       - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="myuser" password="mypassword";
+
+  consumer:
+    build:
+      context: .
+    depends_on:
+      - kafka

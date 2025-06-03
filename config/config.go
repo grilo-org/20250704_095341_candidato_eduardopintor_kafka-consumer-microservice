@@ -22,8 +22,7 @@ var (
 func Init() error {
 	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
-		log.Errorf("Error reading configuration file: %v", err)
-		return err
+		return fmt.Errorf("error reading configuration file: %v", err)
 	}
 
 	KafkaBootstrapServers = viper.GetString("KAFKA_BOOTSTRAP_SERVERS")
@@ -35,10 +34,6 @@ func Init() error {
 	KafkaTopic = viper.GetString("KAFKA_TOPIC")
 	KafkaTopicDlq = viper.GetString("KAFKA_TOPIC_DLQ")
 	TargetServiceUrl = viper.GetString("TARGET_SERVICE_URL")
-
-	if KafkaBootstrapServers == "" {
-		return fmt.Errorf("KAFKA_BOOTSTRAP_SERVERS is not set in the configuration")
-	}
 
 	log.Info("Configuration loaded successfully")
 

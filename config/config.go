@@ -16,6 +16,8 @@ var (
 	KafkaGroupId          string
 	KafkaTopic            string
 	KafkaTopicDlq         string
+	KafkaTopicRetry       string
+	KafkaMaxRetry         int
 	TargetServiceUrl      string
 )
 
@@ -33,6 +35,8 @@ func Init() error {
 	KafkaGroupId = viper.GetString("KAFKA_GROUP_ID")
 	KafkaTopic = viper.GetString("KAFKA_TOPIC")
 	KafkaTopicDlq = viper.GetString("KAFKA_TOPIC_DLQ")
+	KafkaTopicRetry = viper.GetString("KAFKA_TOPIC_RETRY")
+	KafkaMaxRetry = viper.GetInt("KAFKA_MAX_RETRY")
 	TargetServiceUrl = viper.GetString("TARGET_SERVICE_URL")
 
 	log.Info("Configuration loaded successfully")

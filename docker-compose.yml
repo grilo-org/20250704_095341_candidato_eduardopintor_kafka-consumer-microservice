@@ -37,3 +37,11 @@ services:
       - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
       - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="myuser" password="mypassword";
+
+  api-mock:
+    build:
+      context: ./api-mock
+    ports:
+      - "8080:3000"
+    environment:
+      - MOCK_SHOULD_FAIL=false

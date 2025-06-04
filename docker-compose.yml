@@ -18,14 +18,24 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
       - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-256
-      - KAFKA_CLIENT_USERS=myuser
-      - KAFKA_CLIENT_PASSWORDS=mypassword
-      - KAFKA_INTER_BROKER_USER=myuser
-      - KAFKA_INTER_BROKER_PASSWORD=mypassword
+      - KAFKA_CLIENT_USERS=orderuser
+      - KAFKA_CLIENT_PASSWORDS=order123
+      - KAFKA_INTER_BROKER_USER=orderuser
+      - KAFKA_INTER_BROKER_PASSWORD=order123
       - ALLOW_PLAINTEXT_LISTENER=yes
-
     depends_on:
       - zookeeper
+    command: >
+      bash -c "
+        /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh &
+        sleep 20
+        kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9093 --topic orders-topic --replication-factor 1 --partitions 1 --command-config /opt/bitnami/kafka/config/producer.properties
+        kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9093 --topic orders-topic-dlq --replication-factor 1 --partitions 1 --command-config /opt/bitnami/kafka/config/producer.properties
+        kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9093 --topic orders-topic-retry --replication-factor 1 --partitions 1 --command-config /opt/bitnami/kafka/config/producer.properties
+        wait
+      "
+    volumes:
+      - ./kafka/producer.properties:/opt/bitnami/kafka/config/producer.properties
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -36,11 +46,11 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9093
       - KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM=PLAIN
-      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="myuser" password="mypassword";
+      - KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG=org.apache.kafka.common.security.plain.PlainLoginModule required username="orderuser" password="order123";
 
   api-mock:
     build:
-      context: ./api-mock
+      context: ./api_mock
     ports:
       - "8080:3000"
     environment:
